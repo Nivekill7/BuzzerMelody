@@ -1,0 +1,52 @@
+#######################################
+# Syntax Coloring Map For BuzzerMelody
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+BuzzerMelody	KEYWORD1
+keyNote_t	KEYWORD1
+
+#######################################
+# Enumerations (KEYWORD1)
+#######################################
+KEY_A	KEYWORD1
+KEY_AsBf	KEYWORD1
+KEY_B	KEYWORD1
+KEY_C	KEYWORD1
+KEY_CsDf	KEYWORD1
+KEY_D	KEYWORD1
+KEY_DsEf	KEYWORD1
+KEY_E	KEYWORD1
+KEY_F	KEYWORD1
+KEY_FsGf	KEYWORD1
+KEY_G	KEYWORD1
+KEY_GsAf	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin	KEYWORD2
+play	KEYWORD2
+stop	KEYWORD2
+refresh	KEYWORD2
+pause_micro	KEYWORD2
+pause_ms	KEYWORD2
+pause_s	KEYWORD2
+writeResolution	KEYWORD2
+writeFreq	KEYWORD2
+writeNote	KEYWORD2
+changeBpm	KEYWORD2
+playMelody	KEYWORD2
+melody_continuous	KEYWORD2
+melody_playOnce	KEYWORD2
+readFreq	KEYWORD2
+readDuty	KEYWORD2
+readMaxFreq	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+MAX_KEY	LITERAL1
+
