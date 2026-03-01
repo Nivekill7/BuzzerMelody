@@ -1,132 +1,353 @@
-#include "BuzzerMelody.h"
+/*
+ESP32 board  
+*/
+#include <BuzzerMelody.h>
 
+/*
+INSTALL TGP DECODEUR v2.0.0
+*/
 #include <Decodeur.h>
 
-// Decoder instance using Serial as input source
-Decodeur monDecodeur(&Serial);
+/*
+ =========================================================
+ BuzzerMelody Library - Star Wars & Super Mario Bros
+ =========================================================
+ Mélodies incluses:
+ - Star Wars Main Theme (STRING notation)
+ - Super Mario Bros Theme (STRUCT notation)
+ 
+ Commandes Serial @115200 baud:
+ 1 -> Star Wars (STRING)
+ 2 -> Super Mario Bros (STRUCT)
+ s -> Stop
+ p -> Pause 2s
+ c -> Mode continu ON/OFF
+ v X -> Volume (0-100)
+ b X -> BPM
+ f X -> Fréquence directe (Hz)
+ x -> Arrêter le ton
+*/
 
-#define buzzerPin 19
-#define buzzerChannel 0
+Decodeur decoder(&Serial);
 
-// Buzzer object using a specific pin and PWM channel
-BuzzerMelody buzzer(buzzerPin, buzzerChannel);
+// Pin of the buzzer
+#define BUZZER_PIN 19
+#define BUZZER_CHANNEL 0
 
-// Melody format:
-// (key duration, dotted note optional, note, sharp or flat optional, octave)
-//
-// Examples:
-//  nC4   -> normal C, octave 4
-//  n.B8  -> dotted B, octave 8
-//  cc.B#8-> double croche, dotted, B sharp, octave 8
-String melody[] = {
-  "nC0",
-  "bC1",
-  "cC2",
-  "ccC3",
-  "nC4",
-  "nC5",
-  "nC6",
-  "nC7",
-  "nC8",
-  "nB1",
-  "nB2",
-  "nB3",
-  "nB5",
-  "nB6",
-  "nB7",
-  "nB#8",
-  "nBb8",
-  "n.B8",
-  "cc.B#8"
+BuzzerMelody buzzer(BUZZER_PIN, BUZZER_CHANNEL);
+
+// =====================================================
+// STAR WARS MAIN THEME - STRING Notation
+// =====================================================
+// Tempo: 108 BPM
+// Format: "key[.]NOTE[#/b]OCTAVE"
+// key: cc=double croche, c=croche, n=noir, b=blanche, r=ronde
+// .: note pointée (dotted)
+// NOTE: A-G, # ou b pour sharp/flat, P=pause
+// =====================================================
+
+String starWarsTheme[] = {
+  // Introduction fanfare (mesure 1-4)
+  "cD4", "cD4", "cD4",
+  "nG4", "n.D5",
+
+  // Mélodie principale (mesure 5-8)
+  "nC5", "nB4", "nA4", "bG5", "cD5",
+  "nC5", "nB4", "nA4", "bG5", "cD5",
+  "nC5", "nB4", "nC5", "nA4",
+
+  // Répétition thème (mesure 9-12)
+  "cD4", "cD4", "cD4",
+  "nG4", "n.D5",
+  "nC5", "nB4", "nA4", "bG5", "cD5",
+
+  // Section médiane (mesure 13-16)
+  "nC5", "nB4", "nA4", "bG5", "cD5",
+  "nC5", "nB4", "nC5", "nA4",
+
+  // Finale (mesure 17-20)
+  "n.D4", "n.D4", "nE4", "nC4", "nB3", "nA3",
+  "nG3", "cD4", "nE4", "cC4", "cB3", "cA3",
+  "nG3", "cD4", "nE4", "cC4", "cB3", "cC4",
+
+  // Ending
+  "rA3",
+  "nP", "nP"
 };
 
-// Total number of notes in the melody array
-const int melodynote = 19;
+uint8_t starWarsSize = sizeof(starWarsTheme) / sizeof(starWarsTheme[0]);
 
+// =====================================================
+// SUPER MARIO BROS THEME - STRUCT Notation
+// =====================================================
+// Tempo: 200 BPM (rapide et énergique)
+// Structure plus précise avec enum
+// =====================================================
+
+keyNoteStruct marioTheme[] = {
+  // Introduction iconique (mesure 1-2)
+  { croche, 0, E, 5 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, C, 5 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, G, 5 },
+  { noir, 0, MUTE, 0 },
+  { croche, 0, G, 4 },
+  { noir, 0, MUTE, 0 },
+
+  // Mélodie principale (mesure 3-6)
+  { noir, 0, C, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, G, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, A, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, B, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, AsBf, 4 },
+  { croche, 0, A, 4 },
+  { croche, 0, MUTE, 0 },
+
+  // Section rythmique (mesure 7-10)
+  { doubleCroche, 0, G, 4 },
+  { doubleCroche, 0, E, 5 },
+  { doubleCroche, 0, G, 5 },
+  { croche, 0, A, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, F, 5 },
+  { croche, 0, G, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, C, 5 },
+  { croche, 0, D, 5 },
+  { croche, 0, B, 4 },
+  { croche, 0, MUTE, 0 },
+
+  // Répétition mélodie (mesure 11-14)
+  { noir, 0, C, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, G, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, A, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, B, 4 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, AsBf, 4 },
+  { croche, 0, A, 4 },
+  { croche, 0, MUTE, 0 },
+
+  // Section finale (mesure 15-18)
+  { doubleCroche, 0, G, 4 },
+  { doubleCroche, 0, E, 5 },
+  { doubleCroche, 0, G, 5 },
+  { croche, 0, A, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, F, 5 },
+  { croche, 0, G, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, C, 5 },
+  { croche, 0, D, 5 },
+  { croche, 0, B, 4 },
+  { noir, 0, MUTE, 0 },
+
+  // Section descendante (mesure 19-22)
+  { croche, 0, G, 5 },
+  { croche, 0, FsGf, 5 },
+  { croche, 0, F, 5 },
+  { croche, 0, DsEf, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, GsAf, 4 },
+  { croche, 0, A, 4 },
+  { croche, 0, C, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, A, 4 },
+  { croche, 0, C, 5 },
+  { croche, 0, D, 5 },
+
+  // Ending
+  { croche, 0, G, 5 },
+  { croche, 0, FsGf, 5 },
+  { croche, 0, F, 5 },
+  { croche, 0, DsEf, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, E, 5 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, C, 6 },
+  { croche, 0, MUTE, 0 },
+  { croche, 0, C, 6 },
+  { croche, 0, C, 6 },
+  { noir, 0, MUTE, 0 },
+  { noir, 0, MUTE, 0 }
+};
+
+uint8_t marioSize = sizeof(marioTheme) / sizeof(marioTheme[0]);
+
+// =====================================================
+// VARIABLES GLOBALES
+// =====================================================
+bool continuousFlag = false;
+
+// =====================================================
+// SETUP
+// =====================================================
 void setup() {
-  // Initialize serial communication
   Serial.begin(115200);
-  while (!Serial) {}
+  while (!Serial) { delay(10); }
 
-  // Initialize the buzzer with a default BPM value
-  buzzer.begin(100);
+  // Initialisation du buzzer
+  if (!buzzer.begin()) {
+    Serial.println("❌ ERREUR: Échec d'initialisation LEDC");
+    while (1) { delay(1000); }
+  }
 
-  Serial.println("Hello");
+  // Configuration par défaut
+  buzzer.setVolume(40);   // Volume modéré
+  buzzer.changeBpm(120);  // Tempo par défaut
+
+  // Affichage du menu
+  Serial.println();
+  Serial.println("╔════════════════════════════════════════════════╗");
+  Serial.println("║  🎵 BuzzerMelody - Test Console 🎵              ║");
+  Serial.println("╠════════════════════════════════════════════════╣");
+  Serial.println("║  MÉLODIES:                                     ║");
+  Serial.println("║  1 → Star Wars Theme (STRING)    [108 BPM]     ║");
+  Serial.println("║  2 → Super Mario Bros (STRUCT)   [200 BPM]     ║");
+  Serial.println("║                                                ║");
+  Serial.println("║  CONTRÔLES:                                    ║");
+  Serial.println("║  s → Stop la mélodie                           ║");
+  Serial.println("║  p → Pause 2 secondes                          ║");
+  Serial.println("║  c → Mode continu ON/OFF                       ║");
+  Serial.println("║                                                ║");
+  Serial.println("║  PARAMÈTRES:                                   ║");
+  Serial.println("║  v X → Volume (0-100)                          ║");
+  Serial.println("║  b X → BPM (tempo)                             ║");
+  Serial.println("║  f X → Fréquence directe (Hz)                  ║");
+  Serial.println("║  x → Arrêter le ton direct                     ║");
+  Serial.println("╚════════════════════════════════════════════════╝");
+  Serial.println();
+  Serial.println("✅ Système prêt. Entrez une commande...");
+  Serial.println();
 }
 
+// =====================================================
+// LOOP
+// =====================================================
 void loop() {
-  // Update buzzer internal state (timing, melody playback, etc.)
+  // Rafraîchir le buzzer (gestion de la mélodie)
   buzzer.refresh();
 
-  // Update decoder state to check for new serial commands
-  monDecodeur.refresh();
+  // Rafraîchir le décodeur (lecture des commandes)
+  decoder.refresh();
 
-  // Process incoming command if available
-  if (monDecodeur.isAvailable()) {
-    switch (monDecodeur.getCommand()) {
 
-      // Play current sound or melody
-      case ('p'):
-        buzzer.play();
-        break;
+  // Traiter les commandes
+  if (decoder.isAvailable()) {
 
-      // Stop any sound or melody
-      case ('s'):
-        buzzer.stop();
-        break;
+    char cmd = decoder.getCommand();
 
-      // Pause playback for a given duration in milliseconds
-      case ('t'):
-        buzzer.pause_ms((long)monDecodeur.getArg(0));
-        break;
+    if (cmd == '1') {
+      buzzer.stop();
+      buzzer.changeBpm(108);
+      buzzer.playMelody(starWarsTheme, starWarsSize);
 
-      // Set buzzer frequency directly
-      case ('f'):
-        buzzer.writeFreq(monDecodeur.getArg(0));
-        break;
+      Serial.println("Star Wars Theme (STRING) - 108 BPM");
+      Serial.print("Duree approx: ");
+      Serial.print(starWarsSize * 0.55);
+      Serial.println(" s");
+    }
 
-      // Change PWM resolution
-      case ('r'):
-        buzzer.writeResolution(monDecodeur.getArg(0));
-        break;
+    else if (cmd == '2') {
+      buzzer.stop();
+      buzzer.changeBpm(200);
+      buzzer.playMelody(marioTheme, marioSize);
 
-      // Play the predefined melody
-      case ('m'):
-        buzzer.playMelody(melody, melodynote);
-        break;
+      Serial.println("Mario Bros Theme (STRUCT) - 200 BPM");
+      Serial.print("Duree approx: ");
+      Serial.print(marioSize * 0.30);
+      Serial.println(" s");
+    }
 
-      // Play a single note with a given octave
-      case ('k'):
-        buzzer.writeNote((keyNote_t)monDecodeur.getArg(0), monDecodeur.getArg(1));
-        break;
+    else if (cmd == 's') {
+      buzzer.stop();
+      Serial.println("Buzzer stopped");
+    }
 
-      // Print current frequency to the serial monitor
-      case ('g'):
-        Serial.println(buzzer.readFreq());
-        break;
+    else if (cmd == 't') {
+      int pauseMs = decoder.getArg(0);
+      pauseMs = constrain(pauseMs, 0, 10000);
+      buzzer.pause_ms(pauseMs);
 
-      // Print current duty cycle to the serial monitor
-      case ('d'):
-        Serial.println(buzzer.readDuty());
-        break;
+      Serial.print("Pause ");
+      Serial.print(pauseMs);
+      Serial.println(" ms");
+    }
 
-      // Change BPM (tempo) of the melody
-      case ('b'):
-        buzzer.changeBpm(monDecodeur.getArg(0));
-        break;
+    else if (cmd == 'p') {
+      buzzer.play();
+      Serial.println("Play ");
+    }
 
-      // Enable continuous melody playback
-      case ('c'):
-        buzzer.melody_continuous(true);
-        break;
+    else if (cmd == 'c') {
+      continuousFlag = !continuousFlag;
+      buzzer.setContinuous(continuousFlag);
 
-      // Enable single-play mode for the melody
-      case ('o'):
-        buzzer.melody_playOnce(true);
-        break;
+      Serial.print("Continuous mode: ");
+      Serial.println(continuousFlag ? "ON" : "OFF");
+    }
+
+    else if (cmd == 'v') {
+      int vol = decoder.getArg(0);
+      vol = constrain(vol, 0, 100);
+      buzzer.setVolume(vol);
+
+      Serial.print("Volume: ");
+      Serial.print(vol);
+      Serial.println("%");
+    }
+
+    else if (cmd == 'b') {
+      int bpm = decoder.getArg(0);
+      bpm = constrain(bpm, 40, 300);
+      buzzer.changeBpm(bpm);
+
+      Serial.print("Tempo: ");
+      Serial.print(bpm);
+      Serial.println(" BPM");
+    }
+
+    else if (cmd == 'f') {
+      int freq = decoder.getArg(0);
+      freq = constrain(freq, 20, 20000);
+      buzzer.writeFrequency(freq);
+
+      Serial.print("Tone direct: ");
+      Serial.print(freq);
+      Serial.println(" Hz");
+    }
+
+    else if (cmd == 'x') {
+      buzzer.stop();  // coupe uniquement le tone direct
+      Serial.println("Tone stopped");
+    }
+
+    else {
+      Serial.println("Not a command");
     }
   }
 
-  // Allow background tasks (important on ESP32)
-  yield();
+
+  yield();  // Permet au watchdog de respirer
 }

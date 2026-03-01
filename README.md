@@ -1,6 +1,6 @@
 BuzzerMelody is an Arduino library designed for the ESP32 that allows non-blocking playback of musical notes and melodies on a passive buzzer using the LEDC hardware timer.
 
-The library provides low-level control over frequency, duty cycle, resolution, and tempo (BPM), while also offering a simple melody engine based on human-readable string notation (e.g. "nC4", "c.D#5").
+The library provides low-level control over frequency, duty cycle, resolution, and tempo (BPM), while also offering a simple melody engine based on human-readable string notation (e.g. "nC4", "c.D#5") or with the .
 
 Unlike tone()-based approaches, BuzzerMelody relies on the ESP32 LEDC peripheral, enabling accurate frequency generation without blocking delays. Melody playback is driven by a state machine and must be serviced continuously via the refresh() method inside the main loop.
 
